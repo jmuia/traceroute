@@ -127,6 +127,34 @@ MU_TEST(test_timespec_diff_negative_carry) {
   mu_assert_int_eq(999996000, res.tv_nsec);
 }
 
+MU_TEST(test_timespec_diff_safe_update_minuend) {
+  int sign;
+  struct timespec x, y;
+  x.tv_sec = 5;
+  x.tv_nsec = 100;
+  y.tv_sec = 4;
+  y.tv_nsec = 2000;
+
+  sign = timespec_diff(&x, &y, &x);
+  mu_assert_int_eq(1, sign);
+  mu_assert_int_eq(0, x.tv_sec);
+  mu_assert_int_eq(999998100, x.tv_nsec);
+}
+
+MU_TEST(test_timespec_diff_safe_update_subtrahend) {
+  int sign;
+  struct timespec x, y;
+  x.tv_sec = 5;
+  x.tv_nsec = 100;
+  y.tv_sec = 4;
+  y.tv_nsec = 2000;
+
+  sign = timespec_diff(&x, &y, &y);
+  mu_assert_int_eq(1, sign);
+  mu_assert_int_eq(0, y.tv_sec);
+  mu_assert_int_eq(999998100, y.tv_nsec);
+}
+
 MU_TEST_SUITE(test_suite) {
   MU_RUN_TEST(test_timespec_cmp);
   MU_RUN_TEST(test_timespec_ge);
@@ -135,6 +163,8 @@ MU_TEST_SUITE(test_suite) {
   MU_RUN_TEST(test_timespec_diff_carry);
   MU_RUN_TEST(test_timespec_diff_negative);
   MU_RUN_TEST(test_timespec_diff_negative_carry);
+  MU_RUN_TEST(test_timespec_diff_safe_update_minuend);
+  MU_RUN_TEST(test_timespec_diff_safe_update_subtrahend);
 }
 
 int main() {

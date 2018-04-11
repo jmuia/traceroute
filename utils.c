@@ -38,15 +38,14 @@ int timespec_ge(const struct timespec* x, const struct timespec* y) {
  * The sign of the difference between x and y is the return value.
  * In particular, if the difference is negative the return value is -1
  * otherwise it is 1 (including for 0).
+ * It is safe to use one of the diff arguments as the result. eg. x is also res.
  */
 int timespec_diff(const struct timespec* x, const struct timespec* y, struct timespec* res) {
   long BILLION = 1000000000;
   const struct timespec *big, *small;
-  int sign;
+  int sign, carry_secs = 0, carry_nsecs = 0;
 
   assert(x->tv_nsec < BILLION && y->tv_nsec < BILLION);
-  res->tv_sec = 0;
-  res->tv_nsec = 0;
 
   if (timespec_ge(x, y)) {
     big = x;
@@ -59,11 +58,11 @@ int timespec_diff(const struct timespec* x, const struct timespec* y, struct tim
   }
 
   if (big->tv_nsec < small->tv_nsec) {
-    res->tv_sec = -1;
-    res->tv_nsec = BILLION;
+    carry_secs = -1;
+    carry_nsecs = BILLION;
   }
-  res->tv_sec += big->tv_sec - small->tv_sec;
-  res->tv_nsec += big->tv_nsec - small->tv_nsec;
+  res->tv_sec = big->tv_sec - small->tv_sec + carry_secs;
+  res->tv_nsec = big->tv_nsec - small->tv_nsec + carry_nsecs;
   return sign;
 }
 
@@ -80,3 +79,4 @@ void errorf(char *fmt, ...) {
   perror(NULL);
   exit(1);
 }
+

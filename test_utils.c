@@ -155,6 +155,13 @@ MU_TEST(test_timespec_diff_safe_update_subtrahend) {
   mu_assert_int_eq(999998100, y.tv_nsec);
 }
 
+MU_TEST(test_timespec_now_dumb) {
+  // TODO: This is a dumb test.
+  // Figure out how to do robust and deterministic testing.
+  struct timespec now;
+  mu_assert_int_eq(0, timespec_now(&now));
+}
+
 MU_TEST_SUITE(test_suite) {
   MU_RUN_TEST(test_timespec_cmp);
   MU_RUN_TEST(test_timespec_ge);
@@ -165,6 +172,7 @@ MU_TEST_SUITE(test_suite) {
   MU_RUN_TEST(test_timespec_diff_negative_carry);
   MU_RUN_TEST(test_timespec_diff_safe_update_minuend);
   MU_RUN_TEST(test_timespec_diff_safe_update_subtrahend);
+  MU_RUN_TEST(test_timespec_now_dumb);
 }
 
 int main() {

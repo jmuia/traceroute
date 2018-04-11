@@ -5,6 +5,12 @@
 #include <stdlib.h>
 #include <time.h>
 
+#if defined(__MACH__) && !defined(CLOCK_MONOTONIC)
+#include <mach/clock.h>
+#include <mach/mach.h>
+#include <mach/kern_return.h>
+#endif
+
 #include "utils.h"
 
 /**
@@ -64,6 +70,37 @@ int timespec_diff(const struct timespec* x, const struct timespec* y, struct tim
   res->tv_sec = big->tv_sec - small->tv_sec + carry_secs;
   res->tv_nsec = big->tv_nsec - small->tv_nsec + carry_nsecs;
   return sign;
+}
+
+/**
+ * Provides a timespec of the current time.
+ * Prefers clock_gettime() but falls back to mach/clock_get_time()
+ * on Mac OS X where CLOCK_MONOTONIC is not defined
+ * since clock_gettime() is not implemented until Sierra.
+ *
+ * Returns 0 on success -1 on failure.
+ */
+int timespec_now(struct timespec* res) {
+#if defined(__MACH__) && !defined(CLOCK_MONOTONIC)
+  clock_serv_t cclock;
+  mach_timespec_t mts;
+  if (host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cclock) != KERN_SUCCESS) {
+    return -1;
+  }
+  if (clock_get_time(cclock, &mts) != KERN_SUCCESS) {
+    int errnobak = errno;
+    mach_port_deallocate(mach_task_self(), cclock);
+    errno = errnobak;
+    return -1;
+  } else {
+    mach_port_deallocate(mach_task_self(), cclock);
+    res->tv_sec = mts.tv_sec;
+    res->tv_nsec = mts.tv_nsec;
+    return 0;
+  }
+#else
+  return clock_gettime(CLOCK_MONOTONIC, &res);
+#endif
 }
 
 /**

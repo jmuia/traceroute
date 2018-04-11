@@ -1,5 +1,9 @@
-#include <time.h>
 #include <assert.h>
+#include <errno.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "utils.h"
 
@@ -61,4 +65,18 @@ int timespec_diff(const struct timespec* x, const struct timespec* y, struct tim
   res->tv_sec += big->tv_sec - small->tv_sec;
   res->tv_nsec += big->tv_nsec - small->tv_nsec;
   return sign;
+}
+
+/**
+ * Prints a formatted message to stderr, prints a friendly version of errno, and then exits with error code 1.
+ */
+void errorf(char *fmt, ...) {
+  int errnobak = errno;
+  va_list args;
+  va_start(args, fmt);
+  vfprintf(stderr, fmt, args);
+  va_end(args);
+  errno = errnobak;
+  perror(NULL);
+  exit(1);
 }

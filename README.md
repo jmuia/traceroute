@@ -1,8 +1,16 @@
 # Traceroute
 
-An implementation of traceroute.
+A basic implementation of traceroute.
 
-# Running
+```
+ traceroute host -- print the route ip packets take to `host`
+
+ Trace the route to `host` by sending ip packets with short ttl
+ and using ICMP error advice messages to gain information about
+ intermediaries.
+```
+
+## Running
 `traceroute` should be portable, but it's only tested on Mac OS X 10.11.6 and Ubuntu 16.04.04.
 
 Create binary

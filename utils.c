@@ -1,8 +1,11 @@
 #include <assert.h>
 #include <errno.h>
+#include <netdb.h>
+#include <netinet/in.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/socket.h>
 #include <time.h>
 
 #if defined(__MACH__) && !defined(CLOCK_MONOTONIC)
@@ -115,5 +118,49 @@ void errorf(char *fmt, ...) {
   errno = errnobak;
   perror(NULL);
   exit(1);
+}
+
+/**
+ * Returns the appropriate socklen_t depending on IP version.
+ */
+socklen_t socklen(const struct sockaddr *sa) {
+  if (sa->sa_family == AF_INET) {
+    return sizeof(struct sockaddr_in);
+  } else {
+    return sizeof(struct sockaddr_in6);
+  }
+}
+
+/**
+ * Helper to get the host name for the given sockaddr.
+ */
+void get_host_name(const struct sockaddr *sa, char* s, int slen) {
+  int rv;
+  if ((rv = getnameinfo(sa, socklen(sa), s, slen, NULL, 0, 0)) != 0) {
+    errorf("getnameinfo: %s\n", gai_strerror(rv));
+  }
+}
+
+/**
+ * Helper to get appropriate sockaddr depending on IP version.
+ */
+void* get_in_addr(struct sockaddr *sa) {
+  if (sa->sa_family == AF_INET) {
+    return &(((struct sockaddr_in*)sa)->sin_addr);
+  } else {
+    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+  }
+}
+
+/**
+ * Helper to set the port of a sockaddr for either IPv4 or IPv6.
+ * `port` argument should already be in network byte order.
+ */
+void sock_set_port(struct sockaddr *sa, u_short port) {
+  if (sa->sa_family == AF_INET) {
+    ((struct sockaddr_in*)sa)->sin_port = port;
+  } else {
+    ((struct sockaddr_in6*)sa)->sin6_port = port;
+  }
 }
 

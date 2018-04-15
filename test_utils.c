@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <time.h>
+#include <sys/types.h>
 
 #include "minunit.h"
 #include "utils.h"
+
 
 MU_TEST(test_timespec_cmp) {
   struct timespec x, y;
@@ -160,6 +162,10 @@ MU_TEST(test_timespec_now_dumb) {
   // Figure out how to do robust and deterministic testing.
   struct timespec now;
   mu_assert_int_eq(0, timespec_now(&now));
+}
+
+MU_TEST(test_socket_utils) {
+  // TODO: Test socket utils (socklen, get_in_addr, sock_set_port).
 }
 
 MU_TEST_SUITE(test_suite) {

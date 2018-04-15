@@ -102,7 +102,7 @@ int timespec_now(struct timespec* res) {
     return 0;
   }
 #else
-  return clock_gettime(CLOCK_MONOTONIC, &res);
+  return clock_gettime(CLOCK_MONOTONIC, res);
 #endif
 }
 

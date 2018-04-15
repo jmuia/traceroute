@@ -6,6 +6,8 @@
  * intermediaries.
  */
 
+#define _GNU_SOURCE // required for sys/time.h on GNU/Linux.
+
 #include <arpa/inet.h>
 #include <assert.h>
 #include <err.h>
